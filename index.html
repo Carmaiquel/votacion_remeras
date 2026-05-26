@@ -108,21 +108,29 @@ function checkReady() {
 
 document.getElementById('voterName').addEventListener('input', checkReady);
 
-document.getElementById('submitBtn').addEventListener('click', function() {
+document.getElementById('submitBtn').addEventListener('click', async function() {
   const name = document.getElementById('voterName').value.trim();
   if (!name || submitted) return;
-  const data = loadData();
-  if (data.voters.indexOf(name) >= 0) { alert(name + ' ya voto.'); return; }
-  for (var i=0;i<13;i++) {
-    data.votes[i] = (data.votes[i]||0) + myRatings[i];
-    data.counts[i] = (data.counts[i]||0) + 1;
+
+  const votos = [];
+  for (var i = 0; i < 13; i++) {
+    votos.push({
+      remera: i + 1,
+      puntaje: myRatings[i] || 0
+    });
   }
-  data.voters.push(name);
-  saveData(data);
+
+  await fetch("https://script.google.com/macros/s/AKfycbzX8fjx_lpE1jCgIJWaRmIFAjMsVyoopRIRcRDqbf5o-H8n9wfIckSvWIkIz_PHCBd4NA/exec", {
+    method: "POST",
+    body: JSON.stringify({
+      nombre: name,
+      votos: votos
+    })
+  });
+
   submitted = true;
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('successMsg').style.display = 'block';
-  showResults(data);
 });
 
 function showResults(data) {
